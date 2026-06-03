@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COSOCKET - Provider Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 100px auto 0;
+            padding: 2rem;
+        }
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: var(--gray);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-card h3 {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+        .section-title {
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem;
+        }
+        .machine-list, .bookings-list {
+            background: var(--gray);
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+        .machine-item, .booking-item {
+            padding: 1rem;
+            border-bottom: 1px solid var(--light-gray);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .machine-item:last-child, .booking-item:last-child {
+            border-bottom: none;
+        }
+        .status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            font-size: 0.8rem;
+        }
+        .status-pending { background: var(--secondary); color: var(--dark); }
+        .status-confirmed { background: #4caf50; color: white; }
+        .status-completed { background: #2196f3; color: white; }
+        .btn-small {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 0.5rem;
+        }
+        .btn-small:hover {
+            background: var(--primary-dark);
+        }
+        .add-machine-btn {
+            background: var(--secondary);
+            color: var(--dark);
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <h1>CO<span>SOCKET</span></h1>
+                <p>Provider Dashboard</p>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </nav>
+    
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1>Welcome, <span id="ownerName">Provider</span></h1>
+            <button class="add-machine-btn" onclick="showAddMachineModal()">+ Add New Machine</button>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 id="totalMachines">0</h3>
+                <p>Your Machines</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalBookings">0</h3>
+                <p>Total Bookings</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalEarnings">₹0</h3>
+                <p>Total Earnings</p>
+            </div>
+        </div>
+        
+        <h2 class="section-title">Your Machines</h2>
+        <div id="yourMachines" class="machine-list"></div>
+        
+        <h2 class="section-title">Recent Bookings</h2>
+        <div id="bookingsList" class="bookings-list"></div>
+    </div>
+    
+    <!-- Add Machine Modal -->
+    <div id="addMachineModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAddMachineModal()">&times;</span>
+            <h2>Add New Machine</h2>
+            <form id="addMachineForm" onsubmit="addMachine(event)">
+                <div class="form-group">
+                    <label>Machine Name *</label>
+                    <input type="text" id="newMachineName" required>
+                </div>
+                <div class="form-group">
+                    <label>Category *</label>
+                    <select id="newMachineCategory" required>
+                        <option value="metal">Fabrication & Metalworking</option>
+                        <option value="textile">Textile Processing</option>
+                        <option value="food">Food & Agro Processing</option>
+                        <option value="print">Printing & Packaging</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Daily Rent (₹) *</label>
+                    <input type="number" id="newMachinePrice" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="newMachineDesc" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Machine Icon (emoji)</label>
+                    <input type="text" id="newMachineIcon" placeholder="e.g., ⚙️, 🔧, 🖨️">
+                </div>
+                <button type="submit">Add Machine</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        let currentUser = null;
+        let userMachines = [];
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            loadDashboard();
+        });
+        
+        function checkAuth() {
+            const user = localStorage.getItem('user');
+            if (!user) {
+                window.location.href = 'index.html';
+                return;
+            }
+            currentUser = JSON.parse(user);
+            document.getElementById('ownerName').textContent = currentUser.phone;
+        }
+        
+        function loadDashboard() {
+            loadMachines();
+            loadBookings();
+            loadStats();
+        }
+        
+        function loadMachines() {
+            const allMachines = JSON.parse(localStorage.getItem('machines') || '[]');
+            userMachines = allMachines.filter(m => m.owner_phone === currentUser.phone);
+            
+            const container = document.getElementById('yourMachines');
+            if (userMachines.length > 0) {
+                container.innerHTML = userMachines.map(machine => `
+                    <div class="machine-item">
+                        <div>
+                            <strong style="font-size: 1.1rem;">${machine.icon || '🔧'} ${machine.name}</strong><br>
+                            <small>₹${machine.price}/day | ${getCategoryName(machine.category)}</small>
+                        </div>
+                        <div>
+                            <span class="status status-${machine.status === 'available' ? 'confirmed' : 'pending'}">
+                                ${machine.status === 'available' ? 'Available' : 'Unavailable'}
+                            </span>
+                            <button class="btn-small" onclick="toggleMachineStatus(${machine.id})">
+                                ${machine.status === 'available' ? 'Mark Unavailable' : 'Mark Available'}
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="machine-item">No machines listed yet. Click "Add New Machine" to get started.</div>';
+            }
+        }
+        
+        function loadBookings() {
+            const allBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+            const myMachineNames = userMachines.map(m => m.name);
+            const myBookings = allBookings.filter(b => myMachineNames.includes(b.machine_name));
+            
+            const container = document.getElementById('bookingsList');
+            if (myBookings.length > 0) {
+                container.innerHTML = myBookings.map(booking => `
+                    <div class="booking-item">
+                        <div>
+                            <strong>${booking.machine_name}</strong><br>
+                            <small>${booking.customer_name} | ${booking.customer_phone}</small>
+                        </div>
+                        <div>
+                            ${booking.start_date} to ${booking.end_date}<br>
+                            <strong>₹${booking.total_amount}</strong>
+                        </div>
+                        <div>
+                            <span class="status status-${booking.status}">${booking.status}</span>
+                            <button class="btn-small" onclick="updateBookingStatus(${booking.id}, 'confirmed')">Confirm</button>
+                            <button class="btn-small" onclick="updateBookingStatus(${booking.id}, 'completed')">Complete</button>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                container.innerHTML = '<div class="booking-item">No bookings yet.</div>';
+            }
+        }
+        
+        function loadStats() {
+            document.getElementById('totalMachines').textContent = userMachines.length;
+            
+            const allBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+            const myMachineNames = userMachines.map(m => m.name);
+            const confirmedBookings = allBookings.filter(b => myMachineNames.includes(b.machine_name) && b.status === 'confirmed');
+            document.getElementById('totalBookings').textContent = confirmedBookings.length;
+            
+            const totalEarnings = confirmedBookings.reduce((sum, b) => sum + b.total_amount, 0);
+            document.getElementById('totalEarnings').textContent = `₹${totalEarnings}`;
+        }
+        
+        function getCategoryName(category) {
+            const names = {
+                metal: 'Fabrication & Metalworking',
+                textile: 'Textile Processing',
+                food: 'Food & Agro Processing',
+                print: 'Printing & Packaging'
+            };
+            return names[category] || category;
+        }
+        
+        function showAddMachineModal() {
+            document.getElementById('addMachineModal').classList.add('show');
+        }
+        
+        function closeAddMachineModal() {
+            document.getElementById('addMachineModal').classList.remove('show');
+            document.getElementById('addMachineForm').reset();
+        }
+        
+        function addMachine(event) {
+            event.preventDefault();
+            
+            const newMachine = {
+                id: Date.now(),
+                name: document.getElementById('newMachineName').value,
+                category: document.getElementById('newMachineCategory').value,
+                price: parseInt(document.getElementById('newMachinePrice').value),
+                description: document.getElementById('newMachineDesc').value,
+                icon: document.getElementById('newMachineIcon').value || '🔧',
+                owner_phone: currentUser.phone,
+                owner_name: currentUser.phone,
+                status: 'available',
+                created_at: new Date().toISOString()
+            };
+            
+            let machines = JSON.parse(localStorage.getItem('machines') || '[]');
+            machines.push(newMachine);
+            localStorage.setItem('machines', JSON.stringify(machines));
+            
+            // Also add to the main allMachines array for display
+            if (typeof window.allMachines !== 'undefined') {
+                window.allMachines.push({
+                    id: newMachine.id,
+                    name: newMachine.name,
+                    category: newMachine.category,
+                    price: newMachine.price,
+                    description: newMachine.description,
+                    icon: newMachine.icon
+                });
+            }
+            
+            showToast('Machine added successfully!');
+            closeAddMachineModal();
+            loadDashboard();
+        }
+        
+        function toggleMachineStatus(machineId) {
+            let machines = JSON.parse(localStorage.getItem('machines') || '[]');
+            const machineIndex = machines.findIndex(m => m.id === machineId);
+            if (machineIndex !== -1) {
+                machines[machineIndex].status = machines[machineIndex].status === 'available' ? 'unavailable' : 'available';
+                localStorage.setItem('machines', JSON.stringify(machines));
+                showToast('Status updated');
+                loadDashboard();
+            }
+        }
+        
+        function updateBookingStatus(bookingId, status) {
+            let bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+            const bookingIndex = bookings.findIndex(b => b.id === bookingId);
+            if (bookingIndex !== -1) {
+                bookings[bookingIndex].status = status;
+                localStorage.setItem('bookings', JSON.stringify(bookings));
+                showToast(`Booking ${status}!`);
+                loadDashboard();
+            }
+        }
+        
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'index.html';
+        }
+        
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        window.onclick = function(event) {
+            const modal = document.getElementById('addMachineModal');
+            if (event.target === modal) {
+                modal.classList.remove('show');
+            }
+        }
+    </script>
+</body>
+</html>
