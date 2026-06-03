@@ -2,8 +2,8 @@
 // SUPABASE CONFIGURATION
 // ============================================
 // IMPORTANT: Replace these with your actual Supabase credentials
-const SUPABASE_URL = 'https://YOUR_PROJECT.supabase.co';
-const SUPABASE_ANON_KEY = 'YOUR_ANON_KEY';
+const SUPABASE_URL = 'https://ktajpeiiwipmjozwxbkx.supabase.co/rest/v1/';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0YWpwZWlpd2lwbWpvend4Ymt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0NjQ0MDgsImV4cCI6MjA5NjA0MDQwOH0.mWfI2_jTQn3o8KUgnem5N0IJgD2qYIJu4dibPhDpj5I';
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
