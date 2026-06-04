@@ -3,355 +3,405 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COSOCKET - Provider Dashboard</title>
+    <title>COSOCKET – Provider Dashboard</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-        .dashboard-container {
-            max-width: 1200px;
-            margin: 100px auto 0;
-            padding: 2rem;
-        }
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        .stat-card {
-            background: var(--gray);
-            padding: 1.5rem;
-            border-radius: 10px;
-            text-align: center;
-        }
-        .stat-card h3 {
-            font-size: 2rem;
-            color: var(--primary);
-        }
-        .section-title {
-            font-size: 1.5rem;
-            margin: 2rem 0 1rem;
-        }
-        .machine-list, .bookings-list {
-            background: var(--gray);
-            border-radius: 10px;
-            overflow-x: auto;
-        }
-        .machine-item, .booking-item {
-            padding: 1rem;
-            border-bottom: 1px solid var(--light-gray);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-        .machine-item:last-child, .booking-item:last-child {
-            border-bottom: none;
-        }
-        .status {
-            padding: 0.3rem 0.8rem;
-            border-radius: 5px;
-            font-size: 0.8rem;
-        }
-        .status-pending { background: var(--secondary); color: var(--dark); }
-        .status-confirmed { background: #4caf50; color: white; }
-        .status-completed { background: #2196f3; color: white; }
-        .btn-small {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.3rem 0.8rem;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-left: 0.5rem;
-        }
-        .btn-small:hover {
-            background: var(--primary-dark);
-        }
-        .add-machine-btn {
-            background: var(--secondary);
-            color: var(--dark);
-            padding: 0.7rem 1.5rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <h1>CO<span>SOCKET</span></h1>
-                <p>Provider Dashboard</p>
-            </div>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo">
+            <h1>CO<span>SOCKET</span></h1>
+            <p>Provider Dashboard</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:1rem">
+            <span style="color:var(--text-gray);font-size:0.85rem" id="navPhone"></span>
             <button class="logout-btn" onclick="logout()">Logout</button>
         </div>
-    </nav>
-    
-    <div class="dashboard-container">
-        <div class="dashboard-header">
-            <h1>Welcome, <span id="ownerName">Provider</span></h1>
-            <button class="add-machine-btn" onclick="showAddMachineModal()">+ Add New Machine</button>
-        </div>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3 id="totalMachines">0</h3>
-                <p>Your Machines</p>
-            </div>
-            <div class="stat-card">
-                <h3 id="totalBookings">0</h3>
-                <p>Total Bookings</p>
-            </div>
-            <div class="stat-card">
-                <h3 id="totalEarnings">₹0</h3>
-                <p>Total Earnings</p>
-            </div>
-        </div>
-        
-        <h2 class="section-title">Your Machines</h2>
-        <div id="yourMachines" class="machine-list"></div>
-        
-        <h2 class="section-title">Recent Bookings</h2>
-        <div id="bookingsList" class="bookings-list"></div>
     </div>
-    
-    <!-- Add Machine Modal -->
-    <div id="addMachineModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeAddMachineModal()">&times;</span>
-            <h2>Add New Machine</h2>
-            <form id="addMachineForm" onsubmit="addMachine(event)">
-                <div class="form-group">
-                    <label>Machine Name *</label>
-                    <input type="text" id="newMachineName" required>
-                </div>
-                <div class="form-group">
-                    <label>Category *</label>
-                    <select id="newMachineCategory" required>
-                        <option value="metal">Fabrication & Metalworking</option>
-                        <option value="textile">Textile Processing</option>
-                        <option value="food">Food & Agro Processing</option>
-                        <option value="print">Printing & Packaging</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Daily Rent (₹) *</label>
-                    <input type="number" id="newMachinePrice" required>
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="newMachineDesc" rows="3"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Machine Icon (emoji)</label>
-                    <input type="text" id="newMachineIcon" placeholder="e.g., ⚙️, 🔧, 🖨️">
-                </div>
-                <button type="submit">Add Machine</button>
-            </form>
+</nav>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Welcome, <span id="ownerName">Provider</span></h1>
+        <button class="add-machine-btn" onclick="showAddMachineModal()">+ Add New Machine</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Your Machines</div>
+            <h3 id="totalMachines">—</h3>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Confirmed Bookings</div>
+            <h3 id="totalBookings">—</h3>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Earnings</div>
+            <h3 id="totalEarnings">—</h3>
         </div>
     </div>
-    
-    <script>
-        let currentUser = null;
-        let userMachines = [];
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            checkAuth();
-            loadDashboard();
-        });
-        
-        function checkAuth() {
-            const user = localStorage.getItem('user');
-            if (!user) {
-                window.location.href = 'index.html';
+
+    <!-- Machines -->
+    <h2 class="section-title-sm">Your Machines</h2>
+    <div id="yourMachines" class="machine-list">
+        <div class="loading-state"><div class="spinner"></div>Loading…</div>
+    </div>
+
+    <!-- Bookings -->
+    <h2 class="section-title-sm" style="margin-top:2rem">Recent Bookings</h2>
+    <div id="bookingsList" class="bookings-list">
+        <div class="loading-state"><div class="spinner"></div>Loading…</div>
+    </div>
+</div>
+
+<!-- Add Machine Modal -->
+<div id="addMachineModal" class="modal">
+    <div class="modal-content">
+        <button class="close" onclick="closeAddMachineModal()">&times;</button>
+        <h2>Add New Machine</h2>
+        <form id="addMachineForm" onsubmit="addMachine(event)">
+            <div class="form-group">
+                <label>Machine Name *</label>
+                <input type="text" id="newMachineName" required placeholder="e.g. CNC Milling Machine">
+            </div>
+            <div class="form-group">
+                <label>Category *</label>
+                <select id="newMachineCategory" required>
+                    <option value="metal">Fabrication &amp; Metalworking</option>
+                    <option value="textile">Textile Processing</option>
+                    <option value="food">Food &amp; Agro Processing</option>
+                    <option value="print">Printing &amp; Packaging</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Daily Rent (₹) *</label>
+                <input type="number" id="newMachinePrice" required min="100" placeholder="e.g. 2500">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="newMachineDesc" rows="3" placeholder="Capacity, specs, condition…"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Machine Icon (emoji)</label>
+                <input type="text" id="newMachineIcon" placeholder="e.g. ⚙️  🔧  🖨️">
+            </div>
+            <button type="submit" id="addMachineSubmitBtn">Add Machine</button>
+        </form>
+    </div>
+</div>
+
+<script src="supabase-config.js"></script>
+<script>
+    let currentUser  = null;
+    let userMachines = [];
+
+    // ============================================================
+    // INIT
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+        await checkAuth();
+        loadDashboard();
+    });
+
+    async function checkAuth() {
+        // Prefer Supabase session over localStorage
+        try {
+            const { data: { session } } = await getSupabase().auth.getSession();
+            if (session && session.user) {
+                const meta = session.user.user_metadata || {};
+                currentUser = {
+                    id:    session.user.id,
+                    email: session.user.email,
+                    name:  meta.full_name || session.user.email,
+                    phone: meta.phone || '',
+                };
+                localStorage.setItem('user', JSON.stringify(currentUser));
+            } else {
+                // Fall back to localStorage token
+                const raw = localStorage.getItem('user');
+                if (!raw) { window.location.href = 'index.html'; return; }
+                currentUser = JSON.parse(raw);
+            }
+        } catch (_) {
+            const raw = localStorage.getItem('user');
+            if (!raw) { window.location.href = 'index.html'; return; }
+            currentUser = JSON.parse(raw);
+        }
+
+        document.getElementById('ownerName').textContent = currentUser.name || currentUser.email;
+        document.getElementById('navPhone').textContent  = currentUser.email || currentUser.phone || '';
+    }
+
+    async function loadDashboard() {
+        await loadMachines();
+        await loadBookings();
+        await loadStats();
+    }
+
+    // ============================================================
+    // MACHINES
+    // ============================================================
+    async function loadMachines() {
+        const container = document.getElementById('yourMachines');
+        container.innerHTML = `<div class="loading-state"><div class="spinner"></div>Loading…</div>`;
+
+        try {
+            const query = currentUser.id
+                ? getSupabase().from('machines').select('*').eq('owner_id', currentUser.id)
+                : getSupabase().from('machines').select('*').eq('owner_phone', currentUser.phone);
+
+            const { data, error } = await query.order('created_at', { ascending: false });
+            if (error) throw error;
+            userMachines = data || [];
+        } catch (err) {
+            console.warn('Load machines error:', err);
+            // Fallback: localStorage
+            const all = JSON.parse(localStorage.getItem('machines') || '[]');
+            userMachines = all.filter(m =>
+                m.owner_id === currentUser.id || m.owner_phone === currentUser.phone
+            );
+        }
+
+        renderMachines(container);
+    }
+
+    function renderMachines(container) {
+        if (userMachines.length === 0) {
+            container.innerHTML = `<div class="empty-state">
+                <div class="empty-icon">🔧</div>
+                <p>No machines listed yet. Click <strong>+ Add New Machine</strong> to get started.</p>
+            </div>`;
+            return;
+        }
+
+        container.innerHTML = userMachines.map(m => `
+            <div class="machine-item">
+                <div>
+                    <strong>${m.icon || '🔧'} ${escHtml(m.name)}</strong><br>
+                    <small>₹${Number(m.price).toLocaleString('en-IN')}/day · ${getCategoryName(m.category)}</small>
+                </div>
+                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap">
+                    <span class="status status-${m.status === 'available' ? 'available' : 'unavailable'}">
+                        ${m.status === 'available' ? 'Available' : 'Unavailable'}
+                    </span>
+                    <button class="btn-small" onclick="toggleMachineStatus(${m.id}, '${m.status}')">
+                        ${m.status === 'available' ? 'Mark Unavailable' : 'Mark Available'}
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function toggleMachineStatus(machineId, currentStatus) {
+        const newStatus = currentStatus === 'available' ? 'unavailable' : 'available';
+        try {
+            const { error } = await getSupabase()
+                .from('machines').update({ status: newStatus }).eq('id', machineId);
+            if (error) throw error;
+        } catch (err) {
+            console.warn('Toggle status error:', err);
+            // Fallback
+            let machines = JSON.parse(localStorage.getItem('machines') || '[]');
+            const idx = machines.findIndex(m => m.id === machineId);
+            if (idx !== -1) { machines[idx].status = newStatus; localStorage.setItem('machines', JSON.stringify(machines)); }
+        }
+        showToast('Status updated ✓');
+        loadDashboard();
+    }
+
+    // ============================================================
+    // BOOKINGS (query by machine_id FK, fall back to machine_name)
+    // ============================================================
+    async function loadBookings() {
+        const container = document.getElementById('bookingsList');
+        container.innerHTML = `<div class="loading-state"><div class="spinner"></div>Loading…</div>`;
+
+        let myBookings = [];
+        const myMachineIds   = userMachines.map(m => m.id).filter(Boolean);
+        const myMachineNames = userMachines.map(m => m.name);
+
+        try {
+            // Prefer FK join; fall back to name match
+            const { data, error } = myMachineIds.length > 0
+                ? await getSupabase().from('bookings').select('*')
+                    .in('machine_id', myMachineIds)
+                    .order('created_at', { ascending: false })
+                : await getSupabase().from('bookings').select('*')
+                    .in('machine_name', myMachineNames.length > 0 ? myMachineNames : ['__none__'])
+                    .order('created_at', { ascending: false });
+
+            if (error) throw error;
+            myBookings = data || [];
+        } catch (err) {
+            console.warn('Load bookings error:', err);
+            const all = JSON.parse(localStorage.getItem('bookings') || '[]');
+            myBookings = all.filter(b => myMachineNames.includes(b.machine_name));
+        }
+
+        renderBookings(container, myBookings);
+    }
+
+    function renderBookings(container, myBookings) {
+        if (myBookings.length === 0) {
+            container.innerHTML = `<div class="empty-state"><div class="empty-icon">📋</div><p>No bookings yet.</p></div>`;
+            return;
+        }
+
+        container.innerHTML = myBookings.map(b => `
+            <div class="booking-item">
+                <div>
+                    <strong>${escHtml(b.machine_name)}</strong><br>
+                    <small>${escHtml(b.customer_name)} · ${escHtml(b.customer_phone)}</small>
+                </div>
+                <div style="text-align:right">
+                    <div style="font-size:0.88rem;color:var(--text-gray)">${b.start_date} → ${b.end_date}</div>
+                    ${b.total_amount ? `<strong>₹${Number(b.total_amount).toLocaleString('en-IN')}</strong>` : ''}
+                </div>
+                <div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap">
+                    <span class="status status-${b.status}">${b.status}</span>
+                    <button class="btn-small" onclick="updateBookingStatus(${b.id}, 'confirmed')">Confirm</button>
+                    <button class="btn-small" onclick="updateBookingStatus(${b.id}, 'completed')">Complete</button>
+                    <button class="btn-small" onclick="contactCustomer('${escHtml(b.customer_phone)}', '${escHtml(b.machine_name)}')">WhatsApp</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function updateBookingStatus(bookingId, status) {
+        try {
+            const { error } = await getSupabase().from('bookings').update({ status }).eq('id', bookingId);
+            if (error) throw error;
+        } catch (err) {
+            console.warn('Update booking error:', err);
+            let bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
+            const idx = bookings.findIndex(b => b.id === bookingId);
+            if (idx !== -1) { bookings[idx].status = status; localStorage.setItem('bookings', JSON.stringify(bookings)); }
+        }
+        showToast(`Booking ${status} ✓`);
+        loadDashboard();
+    }
+
+    function contactCustomer(phone, machineName) {
+        const msg = `Hello! This is COSOCKET regarding your booking for *${machineName}*. Please let us know if you have any questions. 😊`;
+        window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    }
+
+    // ============================================================
+    // STATS — all from Supabase now (not localStorage)
+    // ============================================================
+    async function loadStats() {
+        document.getElementById('totalMachines').textContent = userMachines.length;
+
+        try {
+            const myMachineIds = userMachines.map(m => m.id).filter(Boolean);
+            if (myMachineIds.length === 0) {
+                document.getElementById('totalBookings').textContent = '0';
+                document.getElementById('totalEarnings').textContent = '₹0';
                 return;
             }
-            currentUser = JSON.parse(user);
-            document.getElementById('ownerName').textContent = currentUser.phone;
+
+            const { data: confirmed, error } = await getSupabase()
+                .from('bookings')
+                .select('total_amount, status')
+                .in('machine_id', myMachineIds)
+                .eq('status', 'confirmed');
+
+            if (error) throw error;
+
+            document.getElementById('totalBookings').textContent = confirmed?.length || 0;
+            const earnings = (confirmed || []).reduce((sum, b) => sum + (Number(b.total_amount) || 0), 0);
+            document.getElementById('totalEarnings').textContent = `₹${earnings.toLocaleString('en-IN')}`;
+        } catch (err) {
+            console.warn('Stats load error:', err);
+            // Graceful fallback
+            document.getElementById('totalBookings').textContent = '—';
+            document.getElementById('totalEarnings').textContent = '—';
         }
-        
-        function loadDashboard() {
-            loadMachines();
-            loadBookings();
-            loadStats();
-        }
-        
-        function loadMachines() {
-            const allMachines = JSON.parse(localStorage.getItem('machines') || '[]');
-            userMachines = allMachines.filter(m => m.owner_phone === currentUser.phone);
-            
-            const container = document.getElementById('yourMachines');
-            if (userMachines.length > 0) {
-                container.innerHTML = userMachines.map(machine => `
-                    <div class="machine-item">
-                        <div>
-                            <strong style="font-size: 1.1rem;">${machine.icon || '🔧'} ${machine.name}</strong><br>
-                            <small>₹${machine.price}/day | ${getCategoryName(machine.category)}</small>
-                        </div>
-                        <div>
-                            <span class="status status-${machine.status === 'available' ? 'confirmed' : 'pending'}">
-                                ${machine.status === 'available' ? 'Available' : 'Unavailable'}
-                            </span>
-                            <button class="btn-small" onclick="toggleMachineStatus(${machine.id})">
-                                ${machine.status === 'available' ? 'Mark Unavailable' : 'Mark Available'}
-                            </button>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                container.innerHTML = '<div class="machine-item">No machines listed yet. Click "Add New Machine" to get started.</div>';
-            }
-        }
-        
-        function loadBookings() {
-            const allBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-            const myMachineNames = userMachines.map(m => m.name);
-            const myBookings = allBookings.filter(b => myMachineNames.includes(b.machine_name));
-            
-            const container = document.getElementById('bookingsList');
-            if (myBookings.length > 0) {
-                container.innerHTML = myBookings.map(booking => `
-                    <div class="booking-item">
-                        <div>
-                            <strong>${booking.machine_name}</strong><br>
-                            <small>${booking.customer_name} | ${booking.customer_phone}</small>
-                        </div>
-                        <div>
-                            ${booking.start_date} to ${booking.end_date}<br>
-                            <strong>₹${booking.total_amount}</strong>
-                        </div>
-                        <div>
-                            <span class="status status-${booking.status}">${booking.status}</span>
-                            <button class="btn-small" onclick="updateBookingStatus(${booking.id}, 'confirmed')">Confirm</button>
-                            <button class="btn-small" onclick="updateBookingStatus(${booking.id}, 'completed')">Complete</button>
-                        </div>
-                    </div>
-                `).join('');
-            } else {
-                container.innerHTML = '<div class="booking-item">No bookings yet.</div>';
-            }
-        }
-        
-        function loadStats() {
-            document.getElementById('totalMachines').textContent = userMachines.length;
-            
-            const allBookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-            const myMachineNames = userMachines.map(m => m.name);
-            const confirmedBookings = allBookings.filter(b => myMachineNames.includes(b.machine_name) && b.status === 'confirmed');
-            document.getElementById('totalBookings').textContent = confirmedBookings.length;
-            
-            const totalEarnings = confirmedBookings.reduce((sum, b) => sum + b.total_amount, 0);
-            document.getElementById('totalEarnings').textContent = `₹${totalEarnings}`;
-        }
-        
-        function getCategoryName(category) {
-            const names = {
-                metal: 'Fabrication & Metalworking',
-                textile: 'Textile Processing',
-                food: 'Food & Agro Processing',
-                print: 'Printing & Packaging'
-            };
-            return names[category] || category;
-        }
-        
-        function showAddMachineModal() {
-            document.getElementById('addMachineModal').classList.add('show');
-        }
-        
-        function closeAddMachineModal() {
-            document.getElementById('addMachineModal').classList.remove('show');
-            document.getElementById('addMachineForm').reset();
-        }
-        
-        function addMachine(event) {
-            event.preventDefault();
-            
-            const newMachine = {
-                id: Date.now(),
-                name: document.getElementById('newMachineName').value,
-                category: document.getElementById('newMachineCategory').value,
-                price: parseInt(document.getElementById('newMachinePrice').value),
-                description: document.getElementById('newMachineDesc').value,
-                icon: document.getElementById('newMachineIcon').value || '🔧',
-                owner_phone: currentUser.phone,
-                owner_name: currentUser.phone,
-                status: 'available',
-                created_at: new Date().toISOString()
-            };
-            
+    }
+
+    // ============================================================
+    // ADD MACHINE
+    // ============================================================
+    function showAddMachineModal() {
+        document.getElementById('addMachineModal').classList.add('show');
+    }
+
+    function closeAddMachineModal() {
+        document.getElementById('addMachineModal').classList.remove('show');
+        document.getElementById('addMachineForm').reset();
+    }
+
+    async function addMachine(event) {
+        event.preventDefault();
+        const btn = document.getElementById('addMachineSubmitBtn');
+        btn.textContent = 'Adding…';
+        btn.disabled    = true;
+
+        const machine = {
+            name:        document.getElementById('newMachineName').value.trim(),
+            category:    document.getElementById('newMachineCategory').value,
+            price:       parseInt(document.getElementById('newMachinePrice').value),
+            description: document.getElementById('newMachineDesc').value.trim() || null,
+            icon:        document.getElementById('newMachineIcon').value.trim() || '🔧',
+            owner_id:    currentUser.id   || null,
+            owner_phone: currentUser.phone || null,
+            owner_name:  currentUser.name  || currentUser.email,
+            status:      'available',
+        };
+
+        try {
+            const { error } = await getSupabase().from('machines').insert([machine]);
+            if (error) throw error;
+            showToast('Machine added successfully! ✅');
+        } catch (err) {
+            console.warn('Add machine error:', err);
+            // Fallback: localStorage
             let machines = JSON.parse(localStorage.getItem('machines') || '[]');
-            machines.push(newMachine);
+            machines.push({ ...machine, id: Date.now(), created_at: new Date().toISOString() });
             localStorage.setItem('machines', JSON.stringify(machines));
-            
-            // Also add to the main allMachines array for display
-            if (typeof window.allMachines !== 'undefined') {
-                window.allMachines.push({
-                    id: newMachine.id,
-                    name: newMachine.name,
-                    category: newMachine.category,
-                    price: newMachine.price,
-                    description: newMachine.description,
-                    icon: newMachine.icon
-                });
-            }
-            
-            showToast('Machine added successfully!');
-            closeAddMachineModal();
-            loadDashboard();
+            showToast('Machine saved locally (sync pending) ✅');
         }
-        
-        function toggleMachineStatus(machineId) {
-            let machines = JSON.parse(localStorage.getItem('machines') || '[]');
-            const machineIndex = machines.findIndex(m => m.id === machineId);
-            if (machineIndex !== -1) {
-                machines[machineIndex].status = machines[machineIndex].status === 'available' ? 'unavailable' : 'available';
-                localStorage.setItem('machines', JSON.stringify(machines));
-                showToast('Status updated');
-                loadDashboard();
-            }
-        }
-        
-        function updateBookingStatus(bookingId, status) {
-            let bookings = JSON.parse(localStorage.getItem('bookings') || '[]');
-            const bookingIndex = bookings.findIndex(b => b.id === bookingId);
-            if (bookingIndex !== -1) {
-                bookings[bookingIndex].status = status;
-                localStorage.setItem('bookings', JSON.stringify(bookings));
-                showToast(`Booking ${status}!`);
-                loadDashboard();
-            }
-        }
-        
-        function logout() {
-            localStorage.removeItem('user');
-            window.location.href = 'index.html';
-        }
-        
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-        
-        window.onclick = function(event) {
-            const modal = document.getElementById('addMachineModal');
-            if (event.target === modal) {
-                modal.classList.remove('show');
-            }
-        }
-    </script>
+
+        btn.textContent = 'Add Machine';
+        btn.disabled    = false;
+        closeAddMachineModal();
+        loadDashboard();
+    }
+
+    // ============================================================
+    // UTILS
+    // ============================================================
+    function getCategoryName(cat) {
+        return { metal: 'Fabrication & Metalworking', textile: 'Textile Processing', food: 'Food & Agro Processing', print: 'Printing & Packaging' }[cat] || cat;
+    }
+
+    function escHtml(str) {
+        return String(str || '')
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+            .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+    }
+
+    function showToast(msg, type = 'success') {
+        const t = document.createElement('div');
+        t.className = `toast${type === 'error' ? ' error' : ''}`;
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(() => t?.remove(), 3500);
+    }
+
+    async function logout() {
+        try { await getSupabase().auth.signOut(); } catch (_) {}
+        localStorage.removeItem('user');
+        window.location.href = 'index.html';
+    }
+
+    window.onclick = function(e) {
+        const modal = document.getElementById('addMachineModal');
+        if (e.target === modal) closeAddMachineModal();
+    };
+</script>
 </body>
 </html>

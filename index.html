@@ -3,161 +3,309 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COSOCKET - Rent Industrial Machines | Pune's #1 Equipment Rental Platform</title>
+    <title>COSOCKET – Rent Industrial Machines | Pune's #1 Equipment Rental Platform</title>
+    <meta name="description" content="Rent CNC, Laser, Press Brake, Welding and 100+ industrial machines in Pune. Pay by day, week or month. Zero maintenance cost.">
     <link rel="stylesheet" href="styles.css">
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="logo">
-                <h1>CO<span>SOCKET</span></h1>
-                <p>Industrial Machine Rentals</p>
-            </div>
-            <ul class="nav-menu">
-                <li><a onclick="scrollToSection('home')">Home</a></li>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo">
+            <h1>CO<span>SOCKET</span></h1>
+            <p>Industrial Machine Rentals</p>
+        </div>
+        <ul class="nav-menu">
+            <li><a onclick="scrollToSection('home')">Home</a></li>
+            <li><a onclick="scrollToSection('machines')">Machines</a></li>
+            <li><a onclick="scrollToSection('how-it-works')">How It Works</a></li>
+            <li><a onclick="scrollToSection('providers')">For Providers</a></li>
+            <li><a onclick="scrollToSection('contact')">Contact</a></li>
+        </ul>
+        <div class="nav-buttons">
+            <button class="btn-provider" onclick="showProviderModal()">List Your Machine</button>
+            <button class="btn-login" id="loginBtn" onclick="handleLoginBtn()">Login / Sign Up</button>
+        </div>
+    </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section id="home" class="hero">
+    <div class="hero-content">
+        <div class="hero-badge">📍 Serving Pune & PCMC Region</div>
+        <h1>Rent Industrial Machines<br><span>Without Buying</span></h1>
+        <p>Connect with verified machine owners in Pune. Pay by day, week or month. Zero maintenance. Delivered to your factory in 48 hours.</p>
+        <div class="hero-stats">
+            <div class="stat"><h3>100+</h3><p>Machines</p></div>
+            <div class="stat"><h3>48hr</h3><p>Delivery</p></div>
+            <div class="stat"><h3>₹0</h3><p>Maintenance</p></div>
+        </div>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search CNC, Laser, Press Brake…" oninput="searchMachines()">
+            <button onclick="searchMachines()">Find Machine</button>
+        </div>
+    </div>
+</section>
+
+<!-- ===== MACHINES ===== -->
+<section id="machines" class="machines-section">
+    <div class="container">
+        <h2 class="section-title">Available Machines</h2>
+        <p class="section-subtitle">Browse from 100+ industrial machines across categories</p>
+        <div class="category-tabs">
+            <button class="cat-btn active" onclick="filterMachines('all', this)">All Machines</button>
+            <button class="cat-btn" onclick="filterMachines('metal', this)">Fabrication & Metal</button>
+            <button class="cat-btn" onclick="filterMachines('textile', this)">Textile Processing</button>
+            <button class="cat-btn" onclick="filterMachines('food', this)">Food & Agro</button>
+            <button class="cat-btn" onclick="filterMachines('print', this)">Printing & Packaging</button>
+        </div>
+        <!-- Login wall banner — hidden once logged in via JS -->
+        <div id="loginWallBanner" class="login-wall-banner" style="display:none">
+            <p>🔒 <span>Login required</span> — Sign in with your WhatsApp number to browse prices, book machines and list your equipment.</p>
+            <button class="login-wall-btn" onclick="showLoginModal('Sign in to book machines and access all features.')">Login / Sign Up Free</button>
+        </div>
+
+        <div id="machinesGrid" class="machines-grid">
+            <div class="loading-state"><div class="spinner"></div>Loading machines…</div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section id="how-it-works" class="how-it-works">
+    <div class="container">
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-subtitle">Get a machine at your factory in 4 simple steps</p>
+        <div class="steps">
+            <div class="step"><div class="step-number">1</div><h3>Find Machine</h3><p>Browse our catalog of 100+ machines across categories</p></div>
+            <div class="step"><div class="step-number">2</div><h3>Book &amp; Pay</h3><p>Select dates and pay 30% advance to confirm</p></div>
+            <div class="step"><div class="step-number">3</div><h3>WhatsApp Confirmation</h3><p>Instant booking confirmation on WhatsApp</p></div>
+            <div class="step"><div class="step-number">4</div><h3>Machine Delivered</h3><p>To your factory within 48 hours</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- ===== PROVIDERS ===== -->
+<section id="providers" class="providers-section">
+    <div class="container">
+        <h2 class="section-title">Own a Machine? Earn From It!</h2>
+        <p class="section-subtitle" style="color:rgba(255,255,255,0.7)">Turn idle equipment into passive income</p>
+        <div class="provider-benefits">
+            <div class="benefit"><h3>💰 Extra Income</h3><p>Earn ₹15,000 – ₹50,000 per month from idle machines</p></div>
+            <div class="benefit"><h3>📅 Full Control</h3><p>Set your own availability, pricing and conditions</p></div>
+            <div class="benefit"><h3>✅ Verified Renters</h3><p>We screen all customers before connecting them with you</p></div>
+            <div class="benefit"><h3>🛡️ Insurance Cover</h3><p>Your machine is insured for the rental period</p></div>
+        </div>
+        <button class="btn-primary" onclick="showProviderModal()">List Your Machine Now</button>
+    </div>
+</section>
+
+<!-- ===== CONTACT ===== -->
+<section id="contact" class="contact-section">
+    <div class="container">
+        <h2 class="section-title">Contact Us</h2>
+        <p class="section-subtitle">We're available Mon–Sat, 9 AM to 8 PM</p>
+        <div class="contact-info">
+            <p>📞 <strong>+91 93224 51995</strong></p>
+            <p>📧 <strong>pallavimore2004@gmail.com</strong></p>
+            <p>📍 <strong>Pune, Maharashtra, India</strong></p>
+            <p>⏰ <strong>Mon–Sat: 9 AM – 8 PM</strong></p>
+        </div>
+    </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>COSOCKET</h3>
+            <p>India's first industrial machine rental platform built for MSMEs in Pune.</p>
+        </div>
+        <div class="footer-section">
+            <h4>Quick Links</h4>
+            <ul>
                 <li><a onclick="scrollToSection('machines')">Machines</a></li>
+                <li><a onclick="scrollToSection('providers')">Become a Provider</a></li>
                 <li><a onclick="scrollToSection('how-it-works')">How It Works</a></li>
-                <li><a onclick="scrollToSection('providers')">For Providers</a></li>
-                <li><a onclick="scrollToSection('contact')">Contact</a></li>
             </ul>
-            <div class="nav-buttons">
-                <button class="btn-provider" onclick="showProviderModal()">List Your Machine</button>
-                <button class="btn-login" onclick="showLoginModal()">Login</button>
-            </div>
         </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="hero-content">
-            <h1>Rent Industrial Machines <span>Without Buying</span></h1>
-            <p>Connect with machine owners in Pune. Pay by day, week, or month. Zero maintenance cost.</p>
-            <div class="hero-stats">
-                <div class="stat"><h3>100+</h3><p>Machines Available</p></div>
-                <div class="stat"><h3>48hr</h3><p>Delivery Time</p></div>
-                <div class="stat"><h3>₹0</h3><p>Maintenance Cost</p></div>
-            </div>
-            <div class="search-bar">
-                <input type="text" id="searchInput" placeholder="Search for CNC, Laser, Press Brake, Welding...">
-                <button onclick="searchMachines()">Find Machine</button>
-            </div>
+        <div class="footer-section">
+            <h4>Contact</h4>
+            <p>📞 +91 93224 51995</p>
+            <p>📧 pallavimore2004@gmail.com</p>
+            <p>📍 Pune, India</p>
         </div>
-    </section>
+    </div>
+    <div class="footer-bottom">© 2025 COSOCKET. All rights reserved.</div>
+</footer>
 
-    <!-- Machines Section -->
-    <section id="machines" class="machines-section">
-        <div class="container">
-            <h2 class="section-title">Available Machines</h2>
-            <div class="category-tabs">
-                <button class="cat-btn active" onclick="filterMachines('all', this)">All Machines</button>
-                <button class="cat-btn" onclick="filterMachines('metal', this)">Fabrication & Metal</button>
-                <button class="cat-btn" onclick="filterMachines('textile', this)">Textile Processing</button>
-                <button class="cat-btn" onclick="filterMachines('food', this)">Food & Agro</button>
-                <button class="cat-btn" onclick="filterMachines('print', this)">Printing & Packaging</button>
+<!-- ===== BOOKING MODAL ===== -->
+<div id="bookingModal" class="modal">
+    <div class="modal-content">
+        <button class="close" onclick="closeModal('bookingModal')">&times;</button>
+        <h2 id="bookingModalTitle">Book Machine</h2>
+
+        <!-- Step 1: Form -->
+        <div id="bookingFormWrapper">
+            <div class="booking-summary" id="bookingSummary" style="display:none">
+                <h3>Booking Summary</h3>
+                <div class="booking-summary-row"><span>Machine</span><span id="summaryMachine">—</span></div>
+                <div class="booking-summary-row"><span>Duration</span><span id="summaryDays">—</span></div>
+                <div class="booking-summary-row"><span>Daily Rate</span><span id="summaryRate">—</span></div>
+                <div class="booking-summary-row total"><span>Total</span><span id="summaryTotal">—</span></div>
+                <div class="booking-summary-row advance"><span>Advance (30%)</span><span id="summaryAdvance">—</span></div>
             </div>
-            <div id="machinesGrid" class="machines-grid"></div>
-        </div>
-    </section>
 
-    <!-- How It Works -->
-    <section id="how-it-works" class="how-it-works">
-        <div class="container">
-            <h2 class="section-title">How It Works</h2>
-            <div class="steps">
-                <div class="step"><div class="step-number">1</div><h3>Find Machine</h3><p>Browse our catalog of 100+ machines</p></div>
-                <div class="step"><div class="step-number">2</div><h3>Book & Pay</h3><p>Select dates, pay 30% advance</p></div>
-                <div class="step"><div class="step-number">3</div><h3>Get WhatsApp Confirmation</h3><p>Instant confirmation on WhatsApp</p></div>
-                <div class="step"><div class="step-number">4</div><h3>Machine Delivered</h3><p>To your factory within 48 hours</p></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Providers Section -->
-    <section id="providers" class="providers-section">
-        <div class="container">
-            <h2 class="section-title">Own a Machine? Earn From It!</h2>
-            <div class="provider-benefits">
-                <div class="benefit"><h3>💰 Extra Income</h3><p>Earn ₹15,000 - ₹50,000 per month</p></div>
-                <div class="benefit"><h3>📅 Full Control</h3><p>Set your own availability & pricing</p></div>
-                <div class="benefit"><h3>✅ Verified Renters</h3><p>We screen all customers</p></div>
-                <div class="benefit"><h3>🛡️ Insurance Cover</h3><p>Your machine is insured</p></div>
-            </div>
-            <button class="btn-primary" onclick="showProviderModal()">List Your Machine Now</button>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact-section">
-        <div class="container">
-            <h2 class="section-title">Contact Us</h2>
-            <div class="contact-info">
-                <p>📞 <strong>+91 93224 51995</strong></p>
-                <p>📧 <strong>pallavimore2004@gmail.com</strong></p>
-                <p>📍 <strong>Pune, Maharashtra, India</strong></p>
-                <p>⏰ <strong>Mon-Sat: 9 AM - 8 PM</strong></p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section"><h3>COSOCKET</h3><p>India's first industrial machine rental platform for MSMEs</p></div>
-                <div class="footer-section"><h4>Quick Links</h4><ul><li><a onclick="scrollToSection('machines')">Machines</a></li><li><a onclick="scrollToSection('providers')">Become a Provider</a></li><li><a onclick="scrollToSection('how-it-works')">How It Works</a></li></ul></div>
-                <div class="footer-section"><h4>Contact</h4><p>📞 +91 93224 51995</p><p>📧 pallavimore2004@gmail.com</p><p>📍 Pune, India</p></div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Booking Modal -->
-    <div id="bookingModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('bookingModal')">&times;</span>
-            <h2>Book Machine</h2>
             <form id="bookingForm" onsubmit="submitBooking(event)">
                 <input type="hidden" id="bookingMachineName">
-                <div class="form-group"><label>Your Name *</label><input type="text" id="customerName" required></div>
-                <div class="form-group"><label>WhatsApp Number *</label><input type="tel" id="customerPhone" required placeholder="10-digit number"></div>
-                <div class="form-group"><label>Start Date *</label><input type="date" id="startDate" required></div>
-                <div class="form-group"><label>End Date *</label><input type="date" id="endDate" required></div>
-                <div class="form-group"><label>Delivery Address</label><textarea id="address" rows="2"></textarea></div>
-                <button type="submit">Confirm Booking (30% Advance)</button>
+                <input type="hidden" id="bookingMachinePrice">
+                <input type="hidden" id="bookingMachineId">
+                <div class="form-group">
+                    <label>Your Name *</label>
+                    <input type="text" id="customerName" required placeholder="Full name">
+                </div>
+                <div class="form-group">
+                    <label>WhatsApp Number *</label>
+                    <input type="tel" id="customerPhone" required placeholder="10-digit number" maxlength="10">
+                </div>
+                <div class="form-group">
+                    <label>Start Date *</label>
+                    <input type="date" id="startDate" required onchange="updateBookingSummary()">
+                </div>
+                <div class="form-group">
+                    <label>End Date *</label>
+                    <input type="date" id="endDate" required onchange="updateBookingSummary()">
+                </div>
+                <div class="form-group" style="position:relative">
+                    <label>Delivery Address</label>
+                    <input type="text" id="address" placeholder="Start typing your factory address…" autocomplete="off" oninput="handleAddressInput(this)">
+                    <div id="addressSuggestions" class="address-suggestions" style="display:none"></div>
+                </div>
+                <button type="submit">Confirm Booking — Pay 30% Advance via WhatsApp</button>
             </form>
         </div>
-    </div>
 
-    <!-- Provider Modal -->
-    <div id="providerModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('providerModal')">&times;</span>
-            <h2>List Your Machine</h2>
-            <form id="providerForm" onsubmit="submitProviderListing(event)">
-                <div class="form-group"><label>Owner Name *</label><input type="text" id="ownerName" required></div>
-                <div class="form-group"><label>WhatsApp Number *</label><input type="tel" id="ownerPhone" required placeholder="10-digit number"></div>
-                <div class="form-group"><label>Machine Name *</label><input type="text" id="machineName" required></div>
-                <div class="form-group"><label>Category *</label><select id="machineCategory" required><option value="metal">Fabrication & Metalworking</option><option value="textile">Textile Processing</option><option value="food">Food & Agro Processing</option><option value="print">Printing & Packaging</option></select></div>
-                <div class="form-group"><label>Daily Rent (₹) *</label><input type="number" id="dailyRent" required></div>
-                <div class="form-group"><label>Machine Description</label><textarea id="machineDesc" rows="2"></textarea></div>
-                <button type="submit">Submit Listing</button>
-            </form>
+        <!-- Step 2: Success -->
+        <div id="bookingSuccess" style="display:none" class="booking-success">
+            <span class="success-icon">✅</span>
+            <h3>Booking Confirmed!</h3>
+            <p id="successText">WhatsApp has been opened with your booking details. Pay 30% advance to confirm delivery.</p>
+            <button class="whatsapp-btn" id="resendWhatsAppBtn" onclick="resendWhatsApp()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                Re-send on WhatsApp
+            </button>
+            <button onclick="closeModal('bookingModal')" style="background:var(--light-gray);border:1px solid var(--border);margin-top:0.5rem">Close</button>
         </div>
     </div>
+</div>
 
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('loginModal')">&times;</span>
-            <h2>Provider Login</h2>
-            <form id="loginForm" onsubmit="sendOTP(event)">
-                <div class="form-group"><label>WhatsApp Number</label><input type="tel" id="loginPhone" required placeholder="10-digit number"></div>
-                <button type="submit">Send OTP</button>
-            </form>
-        </div>
+<!-- ===== PROVIDER MODAL ===== -->
+<div id="providerModal" class="modal">
+    <div class="modal-content">
+        <button class="close" onclick="closeModal('providerModal')">&times;</button>
+        <h2>List Your Machine</h2>
+        <form id="providerForm" onsubmit="submitProviderListing(event)">
+            <div class="form-group">
+                <label>Owner Name *</label>
+                <input type="text" id="ownerName" required placeholder="Your full name">
+            </div>
+            <div class="form-group">
+                <label>WhatsApp Number *</label>
+                <input type="tel" id="ownerPhone" required placeholder="10-digit number" maxlength="10">
+            </div>
+            <div class="form-group">
+                <label>Machine Name *</label>
+                <input type="text" id="machineName" required placeholder="e.g. CNC Milling Machine">
+            </div>
+            <div class="form-group">
+                <label>Category *</label>
+                <select id="machineCategory" required>
+                    <option value="metal">Fabrication &amp; Metalworking</option>
+                    <option value="textile">Textile Processing</option>
+                    <option value="food">Food &amp; Agro Processing</option>
+                    <option value="print">Printing &amp; Packaging</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Daily Rent (₹) *</label>
+                <input type="number" id="dailyRent" required min="100" placeholder="e.g. 2500">
+            </div>
+            <div class="form-group">
+                <label>Machine Description</label>
+                <textarea id="machineDesc" rows="2" placeholder="Capacity, specifications, condition…"></textarea>
+            </div>
+            <button type="submit">Submit Listing</button>
+        </form>
     </div>
+</div>
 
-    <script src="script.js"></script>
+<!-- ===== LOGIN / SIGNUP MODAL ===== -->
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <button class="close" onclick="closeModal('loginModal')">&times;</button>
+
+        <div class="auth-logo">CO<span>SOCKET</span></div>
+        <p id="loginHint" class="auth-hint"></p>
+
+        <!-- Tabs -->
+        <div class="auth-tabs">
+            <button id="tabLogin"  class="auth-tab auth-tab--active" onclick="switchAuthTab('login')">Sign In</button>
+            <button id="tabSignup" class="auth-tab"                   onclick="switchAuthTab('signup')">Create Account</button>
+        </div>
+
+        <!-- LOGIN PANE -->
+        <div id="loginPane">
+            <form onsubmit="handleLogin(event)" autocomplete="on">
+                <div class="form-group">
+                    <label>Email Address *</label>
+                    <input type="email" id="loginEmail" required placeholder="you@example.com" autocomplete="email">
+                </div>
+                <div class="form-group" style="position:relative">
+                    <label>Password *</label>
+                    <input type="password" id="loginPassword" required placeholder="Your password" autocomplete="current-password">
+                </div>
+                <p id="loginError" class="auth-error"></p>
+                <button type="submit" id="loginSubmitBtn">Sign In</button>
+            </form>
+            <p class="auth-switch">Don't have an account? <a onclick="switchAuthTab('signup')">Create one free</a></p>
+        </div>
+
+        <!-- SIGNUP PANE -->
+        <div id="signupPane" style="display:none">
+            <form onsubmit="handleSignup(event)" autocomplete="on">
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="signupName" required placeholder="Your full name" autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label>Email Address *</label>
+                    <input type="email" id="signupEmail" required placeholder="you@example.com" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label>WhatsApp Number</label>
+                    <input type="tel" id="signupPhone" placeholder="10-digit number (optional)" maxlength="10">
+                </div>
+                <div class="form-group">
+                    <label>Password * <span style="color:var(--text-muted);font-weight:400;font-size:0.78rem">(min 6 characters)</span></label>
+                    <input type="password" id="signupPassword" required placeholder="Choose a password" autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password *</label>
+                    <input type="password" id="signupConfirm" required placeholder="Repeat password" autocomplete="new-password">
+                </div>
+                <p id="signupError" class="auth-error"></p>
+                <button type="submit" id="signupSubmitBtn">Create Account</button>
+            </form>
+            <p class="auth-switch">Already have an account? <a onclick="switchAuthTab('login')">Sign in</a></p>
+        </div>
+
+    </div>
+</div>
+
+<script src="supabase-config.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
